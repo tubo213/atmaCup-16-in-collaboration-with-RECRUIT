@@ -67,20 +67,22 @@ def preprocess_yad(all_log_df: pl.DataFrame, yad_df: pl.DataFrame) -> pl.DataFra
 
     # 数値をlog1p変換
     yad_df = yad_df.with_columns(
-        pl.col(
-            [
-                "total_room_cnt",
-                "kd_stn_5min",
-                "kd_bch_5min",
-                "kd_slp_5min",
-                "kd_conv_walk_5min",
-                "counts",
-                "wid_rank",
-                "ken_rank",
-                "lrg_rank",
-                "sml_rank",
-            ]
-        ).apply(lambda x: np.log1p(x))
+        np.log1p(
+            pl.col(
+                [
+                    "total_room_cnt",
+                    "kd_stn_5min",
+                    "kd_bch_5min",
+                    "kd_slp_5min",
+                    "kd_conv_walk_5min",
+                    "counts",
+                    "wid_rank",
+                    "ken_rank",
+                    "lrg_rank",
+                    "sml_rank",
+                ]
+            )
+        )
     )
 
     # cat列をlabel encoding
