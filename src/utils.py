@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Literal, TypeAlias
+from typing import Literal, TypeAlias
 
 import pandas as pd
 import polars as pl
