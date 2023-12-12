@@ -3,6 +3,7 @@ from pathlib import Path
 
 import hydra
 import torch
+import wandb
 from omegaconf import OmegaConf
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import (
@@ -86,6 +87,10 @@ def main(cfg: TrainConfig) -> float:
 
     best_score = checkpoint_cb.best_model_score.item()  # type: ignore
     LOGGER.info(f"Best Score: {best_score}")
+
+    # wadnb finish
+    wandb.finish()
+
     return best_score
 
 
