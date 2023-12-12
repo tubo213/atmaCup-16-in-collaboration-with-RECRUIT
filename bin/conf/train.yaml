@@ -1,0 +1,50 @@
+# ---------- Overriding hydra default configs ----------
+hydra:
+  job:
+    name: train
+    chdir: true
+  run:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}/single
+  sweep:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}
+    subdir: run${hydra.job.num}
+
+defaults:
+  - _self_
+  - dir: local
+  - model: gat
+
+seed: 42
+exp_name: dummy
+fold: 0
+
+k: 2 # k-hop-subgraph
+
+# model params
+mid_dim: 256 # hidden dimension
+num_layers: 4 # number of layers
+dropout_rate: 0.2 # dropout rate
+edge_dropout_rate: 0.2 # edge dropout rate
+
+trainer:
+  epochs: 10
+  accelerator: auto
+  use_amp: true
+  debug: false
+  gradient_clip_val: 0.5
+  accumulate_grad_batches: 1
+  monitor: val_score
+  monitor_mode: max
+  check_val_every_n_epoch: 1
+
+dataset:
+  batch_size: 64
+  num_workers: 24
+
+# optimizer
+optimizer:
+  lr: 0.0005
+
+# scheduler
+scheduler:
+  num_warmup_steps: 0
