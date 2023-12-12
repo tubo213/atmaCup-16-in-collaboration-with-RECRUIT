@@ -139,10 +139,15 @@ class YadGNN(nn.Module):
         # graph conv with residual
         x_prev = x
         for i in range(len(self.convs)):
+            # normalize
+            x = self.batch_norms[i](x)
+            # relu
+            x = F.relu(x)
+            # conv
             x_1 = self.convs[i](x, edge_index, edge_attr)
             x_2 = self.rev_convs[i](x, rev_edge_index, edge_attr)
-            x = F.relu(torch.cat([x_1, x_2], dim=1))
-            x = self.batch_norms[i](x)
+            x = torch.cat([x_1, x_2], dim=1)
+            # add residual
             x = x + x_prev
             x_prev = x
 
