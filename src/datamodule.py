@@ -33,11 +33,14 @@ def unique_last(seq: list[int]) -> tuple[list[int], list[int]]:
     return out[::-1], out_cnt[::-1]
 
 
-# InMemoryDatasetを継承して、データセットを作成
-# 一回作成すると、rootにキャッシュされる
-# 再度作成する場合は、rootを削除する
-# 参考: https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_dataset.html#creating-in-memory-datasets # noqa
 class YadDataset(InMemoryDataset):
+    """YadDataset
+    InMemoryDatasetを継承して、データセットを作成
+    一回作成すると、rootにキャッシュされる
+    再度作成する場合は、rootを削除する
+    参考: https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_dataset.html#creating-in-memory-datasets
+    """
+
     def __init__(self, root, G, log_df, label_df, k=3, name: str = "train_fold0"):
         self.G = G
         self.k = k
