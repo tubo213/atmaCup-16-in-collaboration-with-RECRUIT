@@ -11,8 +11,8 @@ from sklearn.model_selection import GroupKFold
 from torch_geometric.data import Data
 from tqdm import tqdm
 
-from src.utils import Atma16Loader
 from src.conf import PrepareDataConfig
+from src.utils import Atma16Loader
 
 NODE_FEATURE_COLS = [
     "wid_cd",  # cat
