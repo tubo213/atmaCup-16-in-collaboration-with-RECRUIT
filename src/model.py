@@ -136,7 +136,7 @@ class YadGNN(nn.Module):
         x = torch.cat([cd_emb, x[:, 4:]], dim=1)
         x = self.linear1(x)
 
-        # graph conv with residual
+        # ResGCN+
         x_prev = x
         for i in range(len(self.convs)):
             # normalize
