@@ -69,12 +69,18 @@ class YadDataset(InMemoryDataset):
 
         # ノード特徴量
         x = self.G.x[subset]
+        # 最後のノードは1, それ以外は0
         is_last = torch.zeros(x.shape[0], dtype=float)
         is_last[mapping[-1]] = 1.0
+        # 訪問済みノードは1, 未訪問ノードは0
         is_visited = torch.zeros(x.shape[0], dtype=float)
         is_visited[mapping] = 1.0
+        # 訪問順
         order_of_visit = torch.zeros((x.shape[0]), dtype=float)
         order_of_visit[mapping] = torch.arange(len(mapping), dtype=float) + 1.0
+        # 奇数番目のノードは1, 偶数番目のノードは0
+        is_odd = torch.zeros((x.shape[0]), dtype=float)
+        is_odd[mapping] = (torch.arange(len(mapping), dtype=float) % 2).float()
 
         x = torch.cat(
             [
@@ -82,6 +88,7 @@ class YadDataset(InMemoryDataset):
                 is_last.view(-1, 1),
                 is_visited.view(-1, 1),
                 torch.log1p(order_of_visit.view(-1, 1)),
+                is_odd.view(-1, 1),
             ],
             dim=1,
         )
