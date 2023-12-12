@@ -9,7 +9,7 @@ from torch_geometric.utils import k_hop_subgraph
 from tqdm import tqdm
 
 
-def unique_last(seq: list[int]) -> tuple[int, int]:
+def unique_last(seq: list[int]) -> tuple[list[int], list[int]]:
     """複数回出現する要素は最後のみ残す
 
     Args:
@@ -72,7 +72,7 @@ class YadDataset(InMemoryDataset):
     def create_subgraph_data(self, seq, label):
         # サブグラフデータの作成
         # seq: 訪問済みノード, label: 正解ラベル
-        seq, seq_cnt = unique_last(seq)
+        seq, seq_cnt = unique_last(seq)  # 複数回訪問したノードは最後のみ残す
         node_idx = torch.tensor(seq, dtype=torch.long)
         subset, subset_edge_index, mapping, edge_mask = k_hop_subgraph(
             node_idx=node_idx,
