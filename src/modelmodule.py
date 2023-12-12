@@ -12,6 +12,17 @@ from src.model import YadGNN
 from src.utils import mapk
 
 
+def pairwise_hinge_loss(y_pred: torch.Tensor, y_true: torch.Tensor, margin: float = 1.0):
+    """
+    y_pred: (n)
+    y_true: (n)
+    """
+    weight = y_true.unsqueeze(0) > y_true.unsqueeze(1)  # (n, n)
+    loss = F.relu(margin - (y_pred.unsqueeze(0) - y_pred.unsqueeze(1))) * weight
+
+    return loss.sum() / (weight.sum() + 1e-6)
+
+
 def compute_loss(logits: torch.Tensor, data: Batch) -> torch.Tensor:
     sizes = degree(data.batch, dtype=torch.long).tolist()
 
@@ -20,7 +31,9 @@ def compute_loss(logits: torch.Tensor, data: Batch) -> torch.Tensor:
 
     loss = 0
     for y_pred, y_true in zip(logit_list, target_list):
-        loss += F.binary_cross_entropy_with_logits(y_pred, y_true)  # type: ignore
+        # bce_loss = F.binary_cross_entropy_with_logits(y_pred, y_true)  # type: ignore
+        loss = pairwise_hinge_loss(y_pred, y_true)
+        # loss += bce_loss + 0.5 * hinge_loss
 
     return loss / data.num_graphs
 
@@ -33,7 +46,7 @@ def decode(logits: torch.Tensor, data: Batch) -> torch.Tensor:
 
     preds = []
     for y_pred, subset_node_idx in zip(logit_list, subset_node_idx_list):
-        prob = torch.sigmoid(y_pred)
+        prob = y_pred
         # 確率が大きい上位10個を取得
         arg_idx = torch.argsort(prob, descending=True)
         arg_topk = arg_idx[:10]
@@ -136,6 +149,7 @@ class PLYadModel(pl.LightningModule):
             torch.save(self.model.state_dict(), "best_model.pth")
             print(f"Saved best model {self.__best_score} -> {score}")
             self.__best_score = score
+            self.log("best_score", self.__best_score, on_step=False, on_epoch=True, logger=True)
 
         self.validation_step_outputs.clear()
 
