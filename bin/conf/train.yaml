@@ -18,7 +18,7 @@ seed: 42
 exp_name: dummy
 fold: 0
 
-k: 2 # k-hop-subgraph
+k: 3 # k-hop-subgraph
 
 # model params
 mid_dim: 256 # hidden dimension
