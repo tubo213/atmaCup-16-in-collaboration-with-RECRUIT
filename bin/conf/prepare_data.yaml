@@ -12,3 +12,5 @@ hydra:
 defaults:
   - _self_
   - dir: local
+
+n_splits: 5

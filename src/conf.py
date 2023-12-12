@@ -62,6 +62,7 @@ class WeightConfig:
 @dataclass
 class PrepareDataConfig:
     dir: DirConfig
+    n_splits: int
 
 
 @dataclass

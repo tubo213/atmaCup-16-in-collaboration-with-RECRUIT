@@ -113,7 +113,7 @@ def build_graph(
     )
 
 
-def train_test_split(train_log_df: pl.DataFrame, n_splits=5, seed=42) -> pl.DataFrame:
+def train_test_split(train_log_df: pl.DataFrame, n_splits=5) -> pl.DataFrame:
     # session_idでGroupKFold
     kf = GroupKFold(n_splits=n_splits)
     # foldを列に追加
@@ -166,7 +166,7 @@ def main(cfg: PrepareDataConfig):
     torch.save(G, processed_dir / "graph.pt")
 
     # train test split
-    train_log_df = train_test_split(train_log_df)
+    train_log_df = train_test_split(train_log_df, n_splits=cfg.n_splits)
 
     # 保存
     test_log_df.write_csv(processed_dir / "test_log.csv")
