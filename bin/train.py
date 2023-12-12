@@ -75,7 +75,6 @@ def main(cfg):
         logger=pl_logger,
         # resume_from_checkpoint=resume_from,
         num_sanity_val_steps=0,
-        log_every_n_steps=int(len(datamodule.train_dataloader()) * 0.1),
         # sync_batchnorm=True
         check_val_every_n_epoch=cfg.trainer.check_val_every_n_epoch,
     )
