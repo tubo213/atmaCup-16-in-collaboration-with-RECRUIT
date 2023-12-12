@@ -124,7 +124,6 @@ class YadGNN(nn.Module):
         x = data.x
         edge_index = data.edge_index
         edge_attr = data.edge_attr
-
         # dropout edge
         edge_index, edge_mask = dropout_edge(
             edge_index, p=self.edge_dropout_rate, training=self.training

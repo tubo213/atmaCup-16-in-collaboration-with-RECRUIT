@@ -31,7 +31,7 @@ trainer:
   accelerator: auto
   use_amp: true
   debug: false
-  gradient_clip_val: 0.5
+  gradient_clip_val: 1.0
   accumulate_grad_batches: 1
   monitor: val_score
   monitor_mode: max
