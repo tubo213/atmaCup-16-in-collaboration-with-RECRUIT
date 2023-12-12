@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 
 import hydra
@@ -27,6 +28,13 @@ LOGGER = logging.getLogger(Path(__file__).name)
 
 @hydra.main(config_path="conf", config_name="train", version_base="1.2")
 def main(cfg: TrainConfig) -> float:
+    experiment = wandb.init(
+        group=cfg.exp_name,
+        name=Path.cwd().name,
+        project="atmaCup-16-In-Collaboration-with-RECRUIT",
+        settings=wandb.Settings(start_method="thread"),
+    )
+    LOGGER.info("Start Training")
     seed_everything(cfg.seed)
 
     # init lightning model
@@ -53,12 +61,7 @@ def main(cfg: TrainConfig) -> float:
     model_summary = RichModelSummary(max_depth=2)
 
     # init experiment logger
-    run_name = Path.cwd().name
-    pl_logger = WandbLogger(
-        group=cfg.exp_name,
-        name=run_name,
-        project="atmaCup-16-In-Collaboration-with-RECRUIT",
-    )
+    pl_logger = WandbLogger(experiment=experiment)
     wandb_cfg = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
     wandb_cfg = flatten_dict(wandb_cfg)  # 再帰的にdictを展開
     pl_logger.log_hyperparams(wandb_cfg)
@@ -79,17 +82,16 @@ def main(cfg: TrainConfig) -> float:
         logger=pl_logger,
         # resume_from_checkpoint=resume_from,
         num_sanity_val_steps=0,
-        # sync_batchnorm=True
+        sync_batchnorm=True,
         check_val_every_n_epoch=cfg.trainer.check_val_every_n_epoch,
     )
 
     trainer.fit(model, datamodule=datamodule)
+    wandb.finish()
+    LOGGER.info("Finish Training")
 
     best_score = checkpoint_cb.best_model_score.item()  # type: ignore
     LOGGER.info(f"Best Score: {best_score}")
-
-    # wadnb finish
-    wandb.finish()
 
     return best_score
 
