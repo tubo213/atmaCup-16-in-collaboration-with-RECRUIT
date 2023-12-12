@@ -1,0 +1,5 @@
+data_dir: /home/yuuki/Desktop/competitions/atmaCup/atmaCup-16-in-collaboration-with-RECRUIT/data
+processed_dir: /home/yuuki/Desktop/competitions/atmaCup/atmaCup-16-in-collaboration-with-RECRUIT/processed_data
+output_dir: /home/yuuki/Desktop/competitions/atmaCup/atmaCup-16-in-collaboration-with-RECRUIT/output
+model_dir: /home/yuuki/Desktop/competitions/atmaCup/atmaCup-16-in-collaboration-with-RECRUIT/output/train
+sub_dir: ./
