@@ -32,9 +32,9 @@ def main(cfg):
     deg = torch.load(datamodule.processed_dir / "deg" / f"deg_k{cfg.k}.pt")
     LOGGER.info("Set Up DataModule")
     model = PLYadModel(
-        cfg, num_node_features=datamodule.G.x.shape[1] - 4 + 4, num_edge_features=4, deg=deg
+        cfg, num_node_features=datamodule.G.x.shape[1] - 4 + 5, num_edge_features=4, deg=deg
     )
-    # node: -4 + 4 # 4: category, 4: is_last, is_visited, order_of_visit, is_odd
+    # node: -4 + 4 # 4: category, 5: is_last, is_visited, order_of_visit, is_odd, visit_cnt
     # edge: 4: number_of_count, step in, step out, seq_edge
 
     # set callbacks
