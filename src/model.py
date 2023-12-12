@@ -79,7 +79,6 @@ class YadGNN(nn.Module):
     ):
         super(YadGNN, self).__init__()
 
-        assert conv_type in ["gat", "transformer", "pna"]
         assert conv_type != "pna" or deg is not None, "deg must be provided for pna"
 
         self.num_node_features = num_node_features
