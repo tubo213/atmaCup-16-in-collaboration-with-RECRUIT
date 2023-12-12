@@ -24,7 +24,7 @@ LOGGER = logging.getLogger(Path(__file__).name)
 
 
 @hydra.main(config_path="conf", config_name="train", version_base="1.2")
-def main(cfg):
+def main(cfg) -> float:
     seed_everything(cfg.seed)
 
     # init lightning model
@@ -82,6 +82,10 @@ def main(cfg):
     )
 
     trainer.fit(model, datamodule=datamodule)
+
+    best_score = checkpoint_cb.best_model_score.item()  # type: ignore
+    LOGGER.info(f"Best Score: {best_score}")
+    return best_score
 
 
 if __name__ == "__main__":
