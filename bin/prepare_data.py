@@ -12,6 +12,7 @@ from torch_geometric.data import Data
 from tqdm import tqdm
 
 from src.utils import Atma16Loader
+from src.conf import PrepareDataConfig
 
 NODE_FEATURE_COLS = [
     "wid_cd",  # cat
@@ -126,7 +127,7 @@ def train_test_split(train_log_df: pl.DataFrame, n_splits=5, seed=42) -> pl.Data
 
 
 @hydra.main(config_path="conf", config_name="prepare_data.yaml")
-def main(cfg):
+def main(cfg: PrepareDataConfig):
     input_dir = Path(cfg.dir.data_dir)
     processed_dir = Path(cfg.dir.processed_dir)
     processed_dir.mkdir(exist_ok=True, parents=True)

@@ -13,6 +13,7 @@ from pytorch_lightning.callbacks import (
 )
 from pytorch_lightning.loggers import WandbLogger
 
+from src.conf import TrainConfig
 from src.datamodule import YadDataModule
 from src.modelmodule import PLYadModel
 from src.utils import flatten_dict
@@ -24,7 +25,7 @@ LOGGER = logging.getLogger(Path(__file__).name)
 
 
 @hydra.main(config_path="conf", config_name="train", version_base="1.2")
-def main(cfg) -> float:
+def main(cfg: TrainConfig) -> float:
     seed_everything(cfg.seed)
 
     # init lightning model

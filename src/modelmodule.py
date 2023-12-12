@@ -7,6 +7,7 @@ from torch_geometric.data import Batch
 from torch_geometric.utils import degree
 from transformers import get_cosine_schedule_with_warmup
 
+from src.conf import TrainConfig
 from src.model import YadGNN
 from src.utils import mapk
 
@@ -54,7 +55,9 @@ def decode(logits: torch.Tensor, data: Batch) -> torch.Tensor:
 
 
 class PLYadModel(pl.LightningModule):
-    def __init__(self, cfg, num_node_features: int, num_edge_features: int, deg: torch.Tensor):
+    def __init__(
+        self, cfg: TrainConfig, num_node_features: int, num_edge_features: int, deg: torch.Tensor
+    ):
         super().__init__()
         self.save_hyperparameters()
         self.cfg = cfg

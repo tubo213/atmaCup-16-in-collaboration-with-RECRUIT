@@ -6,6 +6,7 @@ import torch
 from torch_geometric.utils import degree
 from tqdm import tqdm
 
+from src.conf import PrepareDegConfig
 from src.datamodule import YadDataset
 
 
@@ -26,7 +27,7 @@ def compute_deg(ds: YadDataset) -> torch.Tensor:
 
 
 @hydra.main(config_path="conf", config_name="prepare_deg.yaml")
-def main(cfg):
+def main(cfg: PrepareDegConfig):
     processed_dir = Path(cfg.dir.processed_dir)
     processed_dir.mkdir(exist_ok=True, parents=True)
     output_dir = processed_dir / "deg"

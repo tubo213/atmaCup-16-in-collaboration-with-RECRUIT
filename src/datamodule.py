@@ -8,6 +8,8 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.utils import k_hop_subgraph
 from tqdm import tqdm
 
+from src.conf import TrainConfig
+
 
 def unique_last(seq: list[int]) -> tuple[list[int], list[int]]:
     """複数回出現する要素は最後のみ残す
@@ -41,7 +43,15 @@ class YadDataset(InMemoryDataset):
     参考: https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_dataset.html#creating-in-memory-datasets
     """
 
-    def __init__(self, root, G, log_df, label_df, k=3, name: str = "train_fold0"):
+    def __init__(
+        self,
+        root: str,
+        G: Data,
+        log_df: pl.DataFrame,
+        label_df: pl.DataFrame,
+        k: int = 3,
+        name: str = "train_fold0",
+    ):
         self.G = G
         self.k = k
         self.log_df = log_df
@@ -72,7 +82,7 @@ class YadDataset(InMemoryDataset):
 
         self.save(data_list, self.processed_paths[0])
 
-    def create_subgraph_data(self, seq, label):
+    def create_subgraph_data(self, seq: list[int], label: int):
         # サブグラフデータの作成
         # seq: 訪問済みノード, label: 正解ラベル
         seq, seq_cnt = unique_last(seq)  # 複数回訪問したノードは最後のみ残す
@@ -85,6 +95,9 @@ class YadDataset(InMemoryDataset):
             flow="target_to_source",
         )
 
+        # ラベル
+        y = (subset == label).float()
+
         # edge特徴量
         edge_attr = self.G.edge_attr[edge_mask]  # (E, 1)
         # 訪問済みノードに対応するエッジのみ1
@@ -93,27 +106,25 @@ class YadDataset(InMemoryDataset):
         seq_edge = connected.prod(dim=1).view(-1, 1)  # (E, 1)
         edge_attr = torch.cat([edge_attr, connected, seq_edge], dim=1)  # (E, 4)
 
-        # ラベル
-        y = (subset == label).float()
-
-        # ノード特徴量
-        x = self.G.x[subset]
+        # node特徴量
+        x: torch.Tensor = self.G.x[subset]
+        num_node: int = x.shape[0]
         # 最後のノードは1, それ以外は0
-        is_last = torch.zeros(x.shape[0], dtype=float)
+        is_last = torch.zeros(num_node).float()
         is_last[mapping[-1]] = 1.0
         # 訪問済みノードは1, 未訪問ノードは0
-        is_visited = torch.zeros(x.shape[0], dtype=float)
+        is_visited = torch.zeros(num_node).float()
         is_visited[mapping] = 1.0
         # 訪問順
-        order_of_visit = torch.zeros((x.shape[0]), dtype=float)
-        order_of_visit[mapping] = torch.arange(len(mapping), dtype=float) + 1.0
+        order_of_visit = torch.zeros((num_node)).float()
+        order_of_visit[mapping] = torch.arange(len(mapping)).float() + 1.0
         # 奇数番目のノードは1, 偶数番目のノードは0
         is_odd = torch.zeros((x.shape[0])).long()
         is_odd[mapping] = torch.arange(1, len(mapping) + 1).long()
         is_odd = (is_odd % 2).float()
         # 訪問回数
-        visit_cnt = torch.zeros(x.shape[0], dtype=float)
-        visit_cnt[mapping] = torch.tensor(seq_cnt, dtype=float)
+        visit_cnt = torch.zeros(num_node).float()
+        visit_cnt[mapping] = torch.tensor(seq_cnt).float()
 
         x = torch.cat(
             [
@@ -138,7 +149,7 @@ class YadDataset(InMemoryDataset):
 
 
 class YadDataModule(LightningDataModule):
-    def __init__(self, cfg):
+    def __init__(self, cfg: TrainConfig):
         super().__init__()
         self.cfg = cfg
         self.data_dir = Path(cfg.dir.data_dir)
