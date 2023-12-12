@@ -9,6 +9,30 @@ from torch_geometric.utils import k_hop_subgraph
 from tqdm import tqdm
 
 
+def unique_last(seq: list[int]) -> tuple[int, int]:
+    """複数回出現する要素は最後のみ残す
+
+    Args:
+        seq (list[int]): 入力シーケンス
+
+    Returns:
+        tuple[int, int]: 重複を除いたシーケンス, 重複を除いたシーケンスの出現回数
+    """
+    out = []
+    out_cnt = []
+    seen = set()
+    for i in seq[::-1]:
+        if i not in seen:
+            out.append(i)
+            seen.add(i)
+            out_cnt.append(1)
+        else:
+            index = out.index(i)
+            out_cnt[index] += 1
+
+    return out[::-1], out_cnt[::-1]
+
+
 # InMemoryDatasetを継承して、データセットを作成
 # 一回作成すると、rootにキャッシュされる
 # 再度作成する場合は、rootを削除する
@@ -47,6 +71,8 @@ class YadDataset(InMemoryDataset):
 
     def create_subgraph_data(self, seq, label):
         # サブグラフデータの作成
+        # seq: 訪問済みノード, label: 正解ラベル
+        seq, seq_cnt = unique_last(seq)
         node_idx = torch.tensor(seq, dtype=torch.long)
         subset, subset_edge_index, mapping, edge_mask = k_hop_subgraph(
             node_idx=node_idx,
@@ -82,6 +108,9 @@ class YadDataset(InMemoryDataset):
         is_odd = torch.zeros((x.shape[0])).long()
         is_odd[mapping] = torch.arange(1, len(mapping) + 1).long()
         is_odd = (is_odd % 2).float()
+        # 訪問回数
+        visit_cnt = torch.zeros(x.shape[0], dtype=float)
+        visit_cnt[mapping] = torch.tensor(seq_cnt, dtype=float)
 
         x = torch.cat(
             [
@@ -90,6 +119,7 @@ class YadDataset(InMemoryDataset):
                 is_visited.view(-1, 1),
                 torch.log1p(order_of_visit.view(-1, 1)),
                 is_odd.view(-1, 1),
+                torch.log1p(visit_cnt.view(-1, 1)),
             ],
             dim=1,
         )
