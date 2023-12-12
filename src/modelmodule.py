@@ -32,7 +32,7 @@ def compute_loss(logits: torch.Tensor, data: Batch) -> torch.Tensor:
     loss = 0
     for y_pred, y_true in zip(logit_list, target_list):
         # bce_loss = F.binary_cross_entropy_with_logits(y_pred, y_true)  # type: ignore
-        loss = pairwise_hinge_loss(y_pred, y_true)
+        loss += pairwise_hinge_loss(y_pred, y_true)
         # loss += bce_loss + 0.5 * hinge_loss
 
     return loss / data.num_graphs
