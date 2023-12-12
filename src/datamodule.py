@@ -109,7 +109,7 @@ class YadDataModule(LightningDataModule):
         )
         return DataLoader(
             val_ds,
-            batch_size=self.cfg.dataset.batch_size,
+            batch_size=self.cfg.dataset.val_batch_size,
             shuffle=False,
             num_workers=self.cfg.dataset.num_workers,
             pin_memory=True,

@@ -39,6 +39,7 @@ trainer:
 
 dataset:
   batch_size: 64
+  val_batch_size: 128
   num_workers: 24
 
 # optimizer
