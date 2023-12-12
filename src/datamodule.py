@@ -79,8 +79,8 @@ class YadDataset(InMemoryDataset):
         order_of_visit = torch.zeros((x.shape[0]), dtype=float)
         order_of_visit[mapping] = torch.arange(len(mapping), dtype=float) + 1.0
         # 奇数番目のノードは1, 偶数番目のノードは0
-        is_odd = torch.zeros((x.shape[0]))
-        is_odd[mapping] = torch.arange(1, len(mapping) + 1)
+        is_odd = torch.zeros((x.shape[0])).long()
+        is_odd[mapping] = torch.arange(1, len(mapping) + 1).long()
         is_odd = (is_odd % 2).float()
 
         x = torch.cat(
