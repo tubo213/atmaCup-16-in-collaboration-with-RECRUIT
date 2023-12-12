@@ -20,12 +20,18 @@ NODE_FEATURE_COLS = [
     "lrg_cd",  # cat
     "sml_cd",  # cat
     "yad_type",  # numeric
+    "wireless_lan_flg",  # numeric
+    "onsen_flg",  # numeric
     "total_room_cnt",  # numeric
     "kd_stn_5min",  # numeric
     "kd_bch_5min",  # numeric
     "kd_slp_5min",  # numeric
     "kd_conv_walk_5min",  # numeric
     "counts",  # numeric
+    "wid_rank",  # numeric
+    "ken_rank",  # numeric
+    "lrg_rank",  # numeric
+    "sml_rank",  # numeric
 ]
 
 
@@ -33,6 +39,14 @@ def preprocess_yad(all_log_df: pl.DataFrame, yad_df: pl.DataFrame) -> pl.DataFra
     # yad_noの出現回数
     vc = all_log_df.get_column("yad_no").value_counts()
     yad_df = yad_df.join(vc, on="yad_no", how="left")
+
+    # カテゴリ内でのcountのランキング
+    yad_df = yad_df.with_columns(
+        pl.col("counts").rank(method="min", descending=True).over("wid_cd").alias("wid_rank"),
+        pl.col("counts").rank(method="min", descending=True).over("ken_cd").alias("ken_rank"),
+        pl.col("counts").rank(method="min", descending=True).over("lrg_cd").alias("lrg_rank"),
+        pl.col("counts").rank(method="min", descending=True).over("sml_cd").alias("sml_rank"),
+    )
 
     # 欠損値を0埋め
     yad_df = yad_df.with_columns(
@@ -61,6 +75,10 @@ def preprocess_yad(all_log_df: pl.DataFrame, yad_df: pl.DataFrame) -> pl.DataFra
                 "kd_slp_5min",
                 "kd_conv_walk_5min",
                 "counts",
+                "wid_rank",
+                "ken_rank",
+                "lrg_rank",
+                "sml_rank",
             ]
         ).apply(lambda x: np.log1p(x))
     )
