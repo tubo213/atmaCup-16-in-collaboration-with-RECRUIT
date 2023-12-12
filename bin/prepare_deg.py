@@ -36,7 +36,14 @@ def main(cfg):
     train_label_df = pl.read_csv(processed_dir / "train_label.csv")
     G = torch.load(processed_dir / "graph.pt")
 
-    ds = YadDataset(G, train_log_df, train_label_df, k=cfg.k)
+    ds = YadDataset(
+        str(processed_dir / "yad_dataset"),
+        G,
+        train_log_df,
+        train_label_df,
+        cfg.k,
+        "train_all",
+    )
     deg = compute_deg(ds)
 
     # Save the in-degree histogram tensor.
