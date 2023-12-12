@@ -9,6 +9,10 @@ from torch_geometric.utils import k_hop_subgraph
 from tqdm import tqdm
 
 
+# InMemoryDatasetを継承して、データセットを作成
+# 一回作成すると、rootにキャッシュされる
+# 再度作成する場合は、rootを削除する
+# 参考: https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_dataset.html#creating-in-memory-datasets # noqa
 class YadDataset(InMemoryDataset):
     def __init__(self, root, G, log_df, label_df, k=3, name: str = "train_fold0"):
         self.G = G
@@ -52,16 +56,35 @@ class YadDataset(InMemoryDataset):
             flow="target_to_source",
         )
 
-        edge_attr = self.G.edge_attr[edge_mask]
+        # edge特徴量
+        edge_attr = self.G.edge_attr[edge_mask]  # (E, 1)
+        # 訪問済みノードに対応するエッジのみ1
+        connected = torch.isin(subset_edge_index, mapping).float().T  # (E, 2)
+        # 訪問済みノードから訪問済みノードへのエッジのみ1
+        seq_edge = connected.prod(dim=1).view(-1, 1)  # (E, 1)
+        edge_attr = torch.cat([edge_attr, connected, seq_edge], dim=1)  # (E, 4)
+
+        # ラベル
         y = (subset == label).float()
 
+        # ノード特徴量
         x = self.G.x[subset]
+        is_last = torch.zeros(x.shape[0], dtype=float)
+        is_last[mapping[-1]] = 1.0
         is_visited = torch.zeros(x.shape[0], dtype=float)
         is_visited[mapping] = 1.0
         order_of_visit = torch.zeros((x.shape[0]), dtype=float)
         order_of_visit[mapping] = torch.arange(len(mapping), dtype=float) + 1.0
 
-        x = torch.cat([x, is_visited.view(-1, 1), torch.log1p(order_of_visit.view(-1, 1))], dim=1)
+        x = torch.cat(
+            [
+                x,
+                is_last.view(-1, 1),
+                is_visited.view(-1, 1),
+                torch.log1p(order_of_visit.view(-1, 1)),
+            ],
+            dim=1,
+        )
 
         return Data(
             x=x.float(),
