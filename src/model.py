@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import ModuleList
 from torch_geometric.data import Data
-from torch_geometric.nn import BatchNorm, GATv2Conv, PNAConv, TransformerConv
+from torch_geometric.nn import BatchNorm, GATv2Conv, GENConv, PNAConv, TransformerConv
 from torch_geometric.utils import dropout_edge
 
 
@@ -58,6 +58,8 @@ def get_conv(
             edge_dim=edge_dim,
             **conv_params,
         )
+    elif conv_type == "gen":
+        return GENConv(in_channels=in_ch, out_channels=out_ch, edge_dim=edge_dim, **conv_params)
     else:
         raise ValueError(f"conv_type {conv_type} is not supported, use gat, transformer, pna")
 

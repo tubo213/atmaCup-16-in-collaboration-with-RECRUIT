@@ -1,0 +1,7 @@
+conv_type: gen
+conv_params:
+  aggr: softmax
+mid_dim: ${mid_dim}
+num_layers: ${num_layers}
+dropout_rate: ${dropout_rate}
+edge_dropout_rate: ${edge_dropout_rate}
