@@ -17,6 +17,10 @@ class Atma16Loader:
     def _load_csv(path: Path, frame_type: DfType) -> DataFrame:
         return pl.read_csv(path) if frame_type == "pl" else pd.read_csv(path)
 
+    @staticmethod
+    def _load_parquet(path: Path, frame_type: DfType) -> DataFrame:
+        return pl.read_parquet(path) if frame_type == "pl" else pd.read_parquet(path)
+
     def load_test_log(self, frame_type: DfType = "pl") -> DataFrame:
         return self._load_csv(self.input_dir / "test_log.csv", frame_type)
 
@@ -39,6 +43,9 @@ class Atma16Loader:
 
     def load_yad(self, frame_type: DfType = "pl") -> DataFrame:
         return self._load_csv(self.input_dir / "yado.csv", frame_type)
+
+    def load_image(self, frame_type: DfType = "pl") -> DataFrame:
+        return self._load_parquet(self.input_dir / "image_embeddings.parquet", frame_type)
 
     def load_all_dfs(self, frame_type: DfType = "pl") -> dict[str, DataFrame]:
         return {
