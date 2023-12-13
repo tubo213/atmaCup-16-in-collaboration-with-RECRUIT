@@ -25,6 +25,7 @@ mid_dim: 256 # hidden dimension
 num_layers: 4 # number of layers
 dropout_rate: 0.2 # dropout rate
 edge_dropout_rate: 0.2 # edge dropout rate
+norm_type: layer # batch or layer
 
 trainer:
   epochs: 10

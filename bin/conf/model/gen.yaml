@@ -4,4 +4,5 @@ conv_params:
 mid_dim: ${mid_dim}
 num_layers: ${num_layers}
 dropout_rate: ${dropout_rate}
+norm_type: ${norm_type}
 edge_dropout_rate: ${edge_dropout_rate}

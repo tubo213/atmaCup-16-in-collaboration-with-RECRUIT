@@ -2,11 +2,12 @@ conv_type: pna
 conv_params:
   aggregators: [mean, min, max, std]
   scalers: [identity, amplification, attenuation]
-  towers: 4
-  pre_layer_num: 2
-  post_layer_num: 2
+  towers: 2
+  pre_layer_num: 1
+  post_layer_num: 1
   divide_input: false
 mid_dim: ${mid_dim}
 num_layers: ${num_layers}
 dropout_rate: ${dropout_rate}
+norm_type: ${norm_type}
 edge_dropout_rate: ${edge_dropout_rate}
