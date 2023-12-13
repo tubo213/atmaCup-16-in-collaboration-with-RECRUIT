@@ -5,7 +5,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import ModuleList
 from torch_geometric.data import Data
-from torch_geometric.nn import BatchNorm, GATv2Conv, GENConv, PNAConv, TransformerConv
+from torch_geometric.nn import (
+    BatchNorm,
+    GATv2Conv,
+    GENConv,
+    LayerNorm,
+    PDNConv,
+    PNAConv,
+    TransformerConv,
+)
 from torch_geometric.utils import dropout_edge
 
 
@@ -60,8 +68,19 @@ def get_conv(
         )
     elif conv_type == "gen":
         return GENConv(in_channels=in_ch, out_channels=out_ch, edge_dim=edge_dim, **conv_params)
+    elif conv_type == "pdn":
+        return PDNConv(in_channels=in_ch, out_channels=out_ch, edge_dim=edge_dim, **conv_params)
     else:
         raise ValueError(f"conv_type {conv_type} is not supported, use gat, transformer, pna")
+
+
+def get_norm(norm_type: str, mid_dim: int):
+    if norm_type == "batch":
+        return BatchNorm(mid_dim)
+    elif norm_type == "layer":
+        return LayerNorm(mid_dim)
+    else:
+        raise ValueError(f"norm_type {norm_type} is not supported, use batch or layer")
 
 
 class YadGNN(nn.Module):
@@ -73,6 +92,7 @@ class YadGNN(nn.Module):
         mid_dim: int = 256,
         dropout_rate: float = 0.2,
         edge_dropout_rate: float = 0.1,
+        norm_type: str = "layer",
         conv_type: str = "gat",
         conv_params: dict = {},
         deg: Optional[torch.Tensor] = None,
@@ -95,7 +115,7 @@ class YadGNN(nn.Module):
         # graph conv
         self.convs = ModuleList()
         self.rev_convs = ModuleList()
-        self.batch_norms = ModuleList()
+        self.norms = ModuleList()
         for _ in range(num_layers):
             conv = get_conv(
                 conv_type,
@@ -115,7 +135,8 @@ class YadGNN(nn.Module):
                 deg=deg,
             )
             self.rev_convs.append(conv)
-            self.batch_norms.append(BatchNorm(mid_dim))
+            norm = get_norm(norm_type, mid_dim)
+            self.norms.append(norm)
 
         self.dropout = nn.Dropout(self.dropout_rate)
         self.linear2 = nn.Linear(mid_dim, 1)
@@ -140,7 +161,7 @@ class YadGNN(nn.Module):
         x_prev = x
         for i in range(len(self.convs)):
             # normalize
-            x = self.batch_norms[i](x)
+            x = self.norms[i](x)
             # relu
             x = F.relu(x)
             # conv
