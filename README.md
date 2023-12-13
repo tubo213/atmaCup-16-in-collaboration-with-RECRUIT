@@ -72,6 +72,9 @@ rye run python bin/train.py k=3 num_layers=10 model=pdn trainer.use_amp=True exp
 rye run python bin/train.py -m model=pdn,gat,transformer lr=0.01,0.001,0.0001 exp_name=exp002
 ```
 
+[optuna plugin](https://hydra.cc/docs/plugins/optuna_sweeper/)を用いればより効率的にパラメータチューニングができます。
+
+
 ## 推論
 
 exp001のモデルを利用して推論。  
