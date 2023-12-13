@@ -91,12 +91,12 @@ class TrainConfig:
 @dataclass
 class InferenceConfig:
     exp_name: str
-    phase: str
+    phase: Literal["val", "test"]
     seed: int
+    train_exp_name: str
+    train_run_name: str
     batch_size: int
     num_workers: int
     use_amp: bool
     dir: DirConfig
-    model: ModelConfig
-    weight: WeightConfig
     dataset: DatasetConfig

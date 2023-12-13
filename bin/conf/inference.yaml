@@ -1,0 +1,25 @@
+# ---------- Overriding hydra default configs ----------
+hydra:
+  job:
+    name: inference
+    chdir: true
+  run:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}/single
+  sweep:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}
+    subdir: run${hydra.job.num}
+
+defaults:
+  - _self_
+  - dir: local
+
+seed: 42
+exp_name: dummy
+train_exp_name: ${exp_name}
+train_run_name: single
+
+phase: test
+use_amp: false
+dataset:
+  batch_size: 64
+  num_workers: 24

@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import polars as pl
 import torch
@@ -48,7 +49,7 @@ class YadDataset(InMemoryDataset):
         root: str,
         G: Data,
         log_df: pl.DataFrame,
-        label_df: pl.DataFrame,
+        label_df: Optional[pl.DataFrame] = None,
         k: int = 3,
         name: str = "train_fold0",
     ):
@@ -68,21 +69,32 @@ class YadDataset(InMemoryDataset):
     def process(self):
         # データの前処理と`Data`オブジェクトの作成
         seq_df = self.log_df.groupby("session_id").agg(pl.col("yad_no")).sort("session_id")
-        seq_df = seq_df.join(
-            self.label_df.select(pl.col("session_id"), pl.col("yad_no").alias("label")),
-            on="session_id",
-            how="left",
-        )
+        if self.label_df is not None:
+            seq_df = seq_df.join(
+                self.label_df.select(pl.col("session_id"), pl.col("yad_no").alias("label")),
+                on="session_id",
+                how="left",
+            )
+        session_id_list = seq_df.get_column("session_id").to_list()
         seq_list = seq_df.get_column("yad_no").to_list()
-        label_list = seq_df.get_column("label").to_list()
+        if self.label_df is not None:
+            label_list = seq_df.get_column("label").to_list()
+        else:
+            label_list = [None] * len(seq_list)
 
         data_list = []
-        for seq, label in tqdm(zip(seq_list, label_list), total=len(seq_list)):
-            data_list.append(self.create_subgraph_data(seq, label))
+        for session_id, seq, label in tqdm(
+            zip(session_id_list, seq_list, label_list), total=len(seq_list)
+        ):
+            data = self.create_subgraph_data(session_id, seq)
+            if label is not None:
+                data.y = (data.subset_node_idx == label).float()
+                data.label = label
+            data_list.append(data)
 
         self.save(data_list, self.processed_paths[0])
 
-    def create_subgraph_data(self, seq: list[int], label: int):
+    def create_subgraph_data(self, session_id: str, seq: list[int]) -> Data:
         # サブグラフデータの作成
         # seq: 訪問済みノード, label: 正解ラベル
         seq, seq_cnt = unique_last(seq)  # 複数回訪問したノードは最後のみ残す
@@ -94,9 +106,6 @@ class YadDataset(InMemoryDataset):
             relabel_nodes=True,
             flow="target_to_source",
         )
-
-        # ラベル
-        y = (subset == label).float()
 
         # edge特徴量
         edge_attr = self.G.edge_attr[edge_mask]  # (E, 1)
@@ -142,9 +151,9 @@ class YadDataset(InMemoryDataset):
             x=x.float(),
             edge_index=subset_edge_index,
             edge_attr=edge_attr,
-            y=y,
             subset_node_idx=subset,
-            label=label,
+            label=None,
+            session_id=session_id,
         )
 
 
