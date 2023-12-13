@@ -9,6 +9,7 @@ DfType: TypeAlias = Literal["pl", "pd"]
 
 
 class Atma16Loader:
+    """https://www.guruguru.science/competitions/22/discussions/13b7656a-c4f1-4cb8-babe-99cf7429c870/"""
     def __init__(self, input_dir: Path):
         self.input_dir = input_dir
         self.csv_paths = input_dir.glob("*.csv")

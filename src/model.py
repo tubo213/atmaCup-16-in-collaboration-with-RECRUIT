@@ -84,6 +84,12 @@ def get_norm(norm_type: str, mid_dim: int):
 
 
 class YadGNN(nn.Module):
+    """ResGCN+ with cd embedding
+    参考: https://github.com/knshnb/kaggle-tpu-graph-5th-place/blob/master/src/nn.py
+
+    Args:
+        nn (_type_): _description_
+    """
     def __init__(
         self,
         num_node_features: int,
