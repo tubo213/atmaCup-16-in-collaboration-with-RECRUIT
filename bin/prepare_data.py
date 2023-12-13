@@ -73,6 +73,11 @@ def preprocess_yad(
                 "kd_slp_5min",
                 "kd_conv_walk_5min",
                 "counts",
+                "exterior",  # numeric
+                "facility",  # numeric
+                "food",  # numeric
+                "others",  # numeric
+                "room",  # numeric
             ]
         ).fill_null(0)
     )
