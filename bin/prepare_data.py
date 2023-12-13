@@ -28,6 +28,11 @@ NODE_FEATURE_COLS = [
     "kd_slp_5min",  # numeric
     "kd_conv_walk_5min",  # numeric
     "counts",  # numeric
+    "exterior",  # numeric
+    "facility",  # numeric
+    "food",  # numeric
+    "others",  # numeric
+    "room",  # numeric
     # "wid_rank",  # numeric
     # "ken_rank",  # numeric
     # "lrg_rank",  # numeric
@@ -35,7 +40,17 @@ NODE_FEATURE_COLS = [
 ]
 
 
-def preprocess_yad(all_log_df: pl.DataFrame, yad_df: pl.DataFrame) -> pl.DataFrame:
+def preprocess_yad(
+    all_log_df: pl.DataFrame, yad_df: pl.DataFrame, image_df: pl.DataFrame
+) -> pl.DataFrame:
+    # image_dfのcategoryを集計
+    image_pivot_df = image_df.pivot(
+        values="emb_0", index="yad_no", columns="category", aggregate_function="count"
+    ).fill_null(0)
+
+    # yad_dfに結合
+    yad_df = yad_df.join(image_pivot_df, on="yad_no", how="left")
+
     # yad_noの出現回数
     vc = all_log_df.get_column("yad_no").value_counts()
     yad_df = yad_df.join(vc, on="yad_no", how="left")
@@ -80,6 +95,11 @@ def preprocess_yad(all_log_df: pl.DataFrame, yad_df: pl.DataFrame) -> pl.DataFra
                     "ken_rank",
                     "lrg_rank",
                     "sml_rank",
+                    "exterior",
+                    "facility",
+                    "food",
+                    "others",
+                    "room",
                 ]
             )
         )
@@ -158,6 +178,7 @@ def main(cfg: PrepareDataConfig):
     test_log_df = dl.load_test_log()
     train_log_df = dl.load_train_log()
     train_label_df = dl.load_train_label()
+    image_df = dl.load_image()
 
     # yad_noを0indexに変換
     yad_df = yad_df.with_columns(
@@ -175,9 +196,12 @@ def main(cfg: PrepareDataConfig):
     train_label_df = train_label_df.with_columns(
         pl.col("yad_no") - 1,
     )
+    image_df = image_df.with_columns(
+        pl.col("yad_no") - 1,
+    )
 
     # yad_dfの前処理
-    yad_df = preprocess_yad(all_log_df, yad_df)
+    yad_df = preprocess_yad(all_log_df, yad_df, image_df)
 
     # グラフの構築
     G = build_graph(yad_df, all_log_df, NODE_FEATURE_COLS)
@@ -193,6 +217,7 @@ def main(cfg: PrepareDataConfig):
     yad_df.write_csv(processed_dir / "yad.csv")
     train_log_df.write_csv(processed_dir / "train_log.csv")
     train_label_df.write_csv(processed_dir / "train_label.csv")
+    image_df.write_parquet(processed_dir / "image_embeddings.parquet")
 
 
 if __name__ == "__main__":
