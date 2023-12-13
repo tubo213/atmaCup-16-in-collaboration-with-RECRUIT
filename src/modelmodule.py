@@ -8,6 +8,7 @@ from torch_geometric.utils import degree
 from transformers import get_cosine_schedule_with_warmup
 
 from src.conf import TrainConfig
+from src.fast_soft_sort.pytorch_ops import soft_rank
 from src.model import YadGNN
 from src.utils import mapk
 
@@ -25,6 +26,7 @@ def pairwise_hinge_loss(y_pred: torch.Tensor, y_true: torch.Tensor, margin: floa
 
 def compute_loss(logits: torch.Tensor, data: Batch) -> torch.Tensor:
     sizes = degree(data.batch, dtype=torch.long).tolist()
+    device = logits.device
 
     logit_list: list[torch.Tensor] = logits.split(sizes)
     target_list: list[torch.Tensor] = data.y.split(sizes)
@@ -32,8 +34,15 @@ def compute_loss(logits: torch.Tensor, data: Batch) -> torch.Tensor:
     loss = 0
     for y_pred, y_true in zip(logit_list, target_list):
         # bce_loss = F.binary_cross_entropy_with_logits(y_pred, y_true)  # type: ignore
-        loss += pairwise_hinge_loss(y_pred, y_true)
+        pairwise_loss = pairwise_hinge_loss(y_pred, y_true)
         # loss += bce_loss + 0.5 * hinge_loss
+
+        mask = y_true.bool()
+        rank = soft_rank(
+            y_pred.view(1, -1).cpu(), direction="DESCENDING", regularization_strength=0.001
+        )
+        rank = rank.view(-1).to(device)[mask]
+        loss += pairwise_loss + (-1 / (rank+1e-5)).mean()
 
     return loss / data.num_graphs
 
@@ -159,4 +168,5 @@ class PLYadModel(pl.LightningModule):
         scheduler = get_cosine_schedule_with_warmup(
             optimizer, num_training_steps=self.trainer.max_steps, **self.cfg.scheduler
         )
+        return [optimizer], [{"scheduler": scheduler, "interval": "step"}]
         return [optimizer], [{"scheduler": scheduler, "interval": "step"}]
