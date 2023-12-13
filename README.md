@@ -69,7 +69,7 @@ rye run python bin/train.py k=3 num_layers=10 model=pdn trainer.use_amp=True exp
 以下は、model=pdn,gat,transformer,lr=0.01,0.001,0.0001の組み合わせを全て試すコマンドです。
 
 ```bash
-rye run python bin/train.py -m model=pdn,gat,transformer lr=0.01,0.001,0.0001 exp_name=exp002
+rye run python bin/train.py -m model=pdn,gat,transformer optimizer.lr=0.01,0.001,0.0001 exp_name=exp002
 ```
 
 [optuna plugin](https://hydra.cc/docs/plugins/optuna_sweeper/)を用いればより効率的にパラメータチューニングができます。
