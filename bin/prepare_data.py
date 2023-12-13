@@ -28,10 +28,10 @@ NODE_FEATURE_COLS = [
     "kd_slp_5min",  # numeric
     "kd_conv_walk_5min",  # numeric
     "counts",  # numeric
-    "wid_rank",  # numeric
-    "ken_rank",  # numeric
-    "lrg_rank",  # numeric
-    "sml_rank",  # numeric
+    # "wid_rank",  # numeric
+    # "ken_rank",  # numeric
+    # "lrg_rank",  # numeric
+    # "sml_rank",  # numeric
 ]
 
 
