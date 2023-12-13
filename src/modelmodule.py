@@ -80,6 +80,7 @@ class PLYadModel(pl.LightningModule):
             num_layers=cfg.model.num_layers,
             mid_dim=cfg.model.mid_dim,
             dropout_rate=cfg.model.dropout_rate,
+            norm_type=cfg.model.norm_type,
             edge_dropout_rate=cfg.model.edge_dropout_rate,
             conv_type=cfg.model.conv_type,
             conv_params=dict(cfg.model.conv_params),
