@@ -80,3 +80,8 @@ exp001のモデルを利用して推論。
 ```bash
 rye run python bin/inference.py exp_name=exp001 phase=test use_amp=false
 ```
+
+# 参考
+
+- https://www.kaggle.com/competitions/otto-recommender-system/discussion/383769
+- https://github.com/knshnb/kaggle-tpu-graph-5th-place/tree/master
