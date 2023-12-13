@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 
 @dataclass
@@ -18,6 +18,7 @@ class ModelConfig:
     mid_dim: int
     dropout_rate: float
     edge_dropout_rate: float
+    norm_type: Literal["layer", "batch"]
     conv_type: str
     conv_params: dict[str, Any]
 
