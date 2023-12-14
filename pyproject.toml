@@ -1,5 +1,5 @@
 [project]
-name = "src"
+name = "atmacup-16-in-collaboration-with-recruit"
 version = "0.1.0"
 description = "Add a short description here"
 authors = [
@@ -48,7 +48,7 @@ url = "https://data.pyg.org/whl/torch-2.1.0+cu121.html"
 type = "find-links"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling<=1.18.0"]
 build-backend = "hatchling.build"
 
 [tool.rye]
