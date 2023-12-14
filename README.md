@@ -54,7 +54,7 @@ rye run python bin/prepare_data.py
 
 3. (Optional) PNAConvを利用する場合はprepare_deg.pyを実行
 ```bash
-rye run python -m bin/prepare_deg.py k=1,2,3
+rye run python bin/prepare_deg.py -m k=1,2,3
 ```
 
 ## 学習
