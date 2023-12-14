@@ -62,7 +62,7 @@ rye run python -m bin/prepare_deg.py k=1,2,3
 以下コマンドでCV=0.397,LB=0.428をのモデルを学習
 
 ```bash
-rye run python bin/train.py k=3 num_layers=10 model=pdn trainer.use_amp=True exp_name=exp001
+rye run python bin/train.py k=3 num_layers=10 model=pdn trainer.use_amp=false exp_name=exp001
 ```
 
 [hydra](https://hydra.cc/docs/intro/)を利用しているため、グリッドサーチが簡単にできます。
